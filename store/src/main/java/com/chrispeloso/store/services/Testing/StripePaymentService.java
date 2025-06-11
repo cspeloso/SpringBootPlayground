@@ -1,4 +1,4 @@
-package com.chrispeloso.store;
+package com.chrispeloso.store.services.Testing;
 
 public class StripePaymentService implements PaymentService {
 

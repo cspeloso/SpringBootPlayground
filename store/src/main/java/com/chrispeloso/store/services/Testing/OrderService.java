@@ -1,8 +1,6 @@
-package com.chrispeloso.store;
+package com.chrispeloso.store.services.Testing;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 @Component  //  @Component - Manages objects of type OrderService via Spring. @Service is an alias for @Component. We typically use @Component for utility classes. @Service is typically used for classes that contain business logic.
 public class OrderService {

@@ -1,4 +1,4 @@
-package com.chrispeloso.store;
+package com.chrispeloso.store.controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
