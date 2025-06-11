@@ -1,14 +1,13 @@
 package com.chrispeloso.store.services;
 
+import com.chrispeloso.store.dto.PortfolioSummaryDTO;
 import com.chrispeloso.store.model.PortfolioEntry;
-import com.chrispeloso.store.model.PortfolioSummaryResponse;
-import com.chrispeloso.store.model.StockHolding;
+import com.chrispeloso.store.model.QuoteResponse;
 import com.chrispeloso.store.repository.PortfolioRepository;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PortfolioService {
@@ -24,31 +23,15 @@ public class PortfolioService {
     }
 
     //  gets a summary of the user's portfolio positions.
-    public Mono<PortfolioSummaryResponse> getPortfolioSummary() {
+    public List<PortfolioSummaryDTO> getPortfolioSummary() {
         List<PortfolioEntry> entries = portfolioRepository.findAll();
-        List<Mono<StockHolding>> holdingMonos = new ArrayList<>();
-
-        for (PortfolioEntry entry : entries) {
-            Mono<StockHolding> holdingMono = finnhubService.getQuote(entry.getSymbol())
-                    .map(quote -> new StockHolding(
-                            entry.getSymbol(),
-                            entry.getQuantity(),
-                            quote.getC(),
-                            quote.getC() * entry.getQuantity()
-                    ));
-            holdingMonos.add(holdingMono);
-        }
-
-        return Mono.zip(holdingMonos, results -> {
-            List<StockHolding> holdings = new ArrayList<>();
-            double totalValue = 0;
-            for (Object result : results) {
-                StockHolding holding = (StockHolding) result;
-                totalValue += holding.getValue();
-                holdings.add(holding);
-            }
-            return new PortfolioSummaryResponse(holdings, totalValue);
-        });
+        return entries.stream()
+                .map(entry -> {
+                    QuoteResponse quote = finnhubService.getQuote(entry.getSymbol()).block();
+                    double price = quote != null ? quote.getC() : 0.0;
+                    return new PortfolioSummaryDTO(entry.getSymbol(), entry.getQuantity(), price);
+                })
+                .collect(Collectors.toList());
     }
 
     public void addEntry(PortfolioEntry entry){
